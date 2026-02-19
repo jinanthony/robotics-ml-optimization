@@ -1,0 +1,10 @@
+torch
+torchvision
+ultralytics
+onnx
+onnxruntime-gpu
+opencv-python
+numpy
+pandas
+mlflow
+matplotlib
