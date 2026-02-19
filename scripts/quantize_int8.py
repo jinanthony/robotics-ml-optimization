@@ -5,20 +5,30 @@ from onnxruntime.quantization import quantize_static, CalibrationDataReader, Qua
 
 class CalibDataReader(CalibrationDataReader):
     def __init__(self, img_dir="calib_images"):
-        self.img_paths = [os.path.join(img_dir, f) for f in os.listdir(img_dir)]
+        self.img_paths = [
+            os.path.join(img_dir, f)
+            for f in os.listdir(img_dir)
+            if f.lower().endswith((".jpg", ".jpeg", ".png"))
+        ]
         self.idx = 0
 
     def get_next(self):
-        if self.idx >= len(self.img_paths):
-            return None
+        while self.idx < len(self.img_paths):
+            path = self.img_paths[self.idx]
+            self.idx += 1
 
-        img = cv2.imread(self.img_paths[self.idx])
-        img = cv2.resize(img, (640, 640))
-        img = img.transpose(2, 0, 1) / 255.0
-        img = img[np.newaxis, :].astype(np.float32)
+            img = cv2.imread(path)
+            if img is None:
+                print(f"[WARN] Skipping unreadable image: {path}")
+                continue
 
-        self.idx += 1
-        return {"images": img}
+            img = cv2.resize(img, (640, 640))
+            img = img.transpose(2, 0, 1) / 255.0
+            img = img[np.newaxis, :].astype(np.float32)
+
+            return {"images": img}
+
+        return None
 
 quantize_static(
     model_input="yolov8n.onnx",
