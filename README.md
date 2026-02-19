@@ -1,2 +1,14 @@
-# robotics-ml-optimization
-Project for building + optimizing a real-time robotics perception pipeline on GPU using INT8 quantization and structured pruning, achieving X% latency reduction and Y% GPU memory savings. Additionally, profiling GPU runtime with Nsight to identify and optimize inference bottlenecks.
+# Real-Time Robotics Inference Optimization
+
+This project demonstrates ML infrastructure optimization techniques for real-time robotics perception on GPU:
+- Baseline FP32 inference
+- INT8 quantization via ONNX Runtime
+- Structured pruning
+- GPU profiling and benchmarking
+- Real-time inference loop
+
+## Setup
+```bash
+conda create -n ml-infra python=3.10
+conda activate ml-infra
+pip install -r requirements.txt
