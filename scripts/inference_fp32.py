@@ -2,27 +2,24 @@ import time
 import torch
 from ultralytics import YOLO
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda"
 model = YOLO("yolov8n.pt").to(device)
-
 dummy = torch.randn(1, 3, 640, 640).to(device)
 
 # Warmup
-for _ in range(10):
+for _ in range(30):
     model(dummy)
 
 torch.cuda.synchronize()
-start = time.time()
 
-N = 100
+N = 200
+latencies = []
 for _ in range(N):
+    start = time.perf_counter()
     model(dummy)
+    torch.cuda.synchronize()
+    latencies.append((time.perf_counter() - start) * 1000)
 
-torch.cuda.synchronize()
-end = time.time()
-
-latency_ms = (end - start) * 1000 / N
-mem_mb = torch.cuda.max_memory_allocated() / 1024**2
-
-print(f"FP32 Latency: {latency_ms:.2f} ms")
-print(f"GPU Memory: {mem_mb:.1f} MB")
+print(f"FP32 mean latency: {sum(latencies)/len(latencies):.2f} ms")
+print(f"P95 latency: {sorted(latencies)[int(0.95 * len(latencies))]:.2f} ms")
+print(f"GPU mem: {torch.cuda.max_memory_allocated() / 1024**2:.1f} MB")
